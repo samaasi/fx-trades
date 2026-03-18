@@ -64,6 +64,14 @@ npm run start:prod
 - `GET /api/v1/wallet` - Get wallet balances
 - `POST /api/v1/wallet/fund` - Fund wallet
 - `POST /api/v1/wallet/convert` - Convert currencies using real-time rates
+- `POST /api/v1/wallet/trade` - Trade currencies with a 1% platform fee
+
+### FX Rates
+- `GET /api/v1/fx/rates?base=NGN` - Get latest exchange rates (cached)
+
+### Transactions
+- `GET /api/v1/transactions` - Get user transaction history
+- `GET /api/v1/transactions/ledger` - Get detailed ledger entries (Internal audit log)
 
 ## Project Structure
 

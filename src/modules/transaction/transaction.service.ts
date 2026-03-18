@@ -64,4 +64,19 @@ export class TransactionService {
 
     return savedTransaction;
   }
+
+  async getTransactionHistory(userId: string): Promise<Transaction[]> {
+    return this.transactionRepository.find({
+      where: { userId },
+      relations: ['user'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async getLedgerEntries(userId: string): Promise<Ledger[]> {
+    return this.ledgerRepository.find({
+      where: { userId },
+      order: { createdAt: 'DESC' },
+    });
+  }
 }

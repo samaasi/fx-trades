@@ -6,6 +6,7 @@ export enum TransactionType {
   CONVERT = 'convert',
   WITHDRAW = 'withdraw',
   TRANSFER = 'transfer',
+  TRADE = 'trade',
 }
 
 export enum TransactionStatus {
