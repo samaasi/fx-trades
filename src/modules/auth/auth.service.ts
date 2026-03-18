@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { HashService } from '../../common/hash/hash.service';
 import { OtpService } from '../../common/otp/otp.service';
+import { NotificationService } from '../notification/notification.service';
 
 @Injectable()
 export class AuthService {
@@ -16,6 +17,7 @@ export class AuthService {
     private readonly hashService: HashService,
     private readonly jwtService: JwtService,
     private readonly otpService: OtpService,
+    private readonly notificationService: NotificationService,
   ) {}
 
   async register(registerDto: RegisterDto) {
@@ -39,8 +41,7 @@ export class AuthService {
 
     await this.userRepository.save(user);
 
-    // TODO: Send email with OTP (Placeholder)
-    console.log(`OTP for ${email}: ${otp}`);
+    await this.notificationService.sendVerificationEmail(email, otp);
 
     return {
       message: 'User registered successfully. Please verify your email with the OTP sent.',
