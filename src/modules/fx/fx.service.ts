@@ -3,12 +3,14 @@ import { ConfigService } from '@nestjs/config';
 import type { IFxProvider } from './providers/fx.provider.interface';
 import { RedisService } from '../../infrastructure/cache/redis.service';
 
+import { FX_PROVIDER } from '../../common/constants/tokens';
+
 @Injectable()
 export class FxService {
   private readonly cacheTtl: number;
 
   constructor(
-    @Inject('IFxProvider')
+    @Inject(FX_PROVIDER)
     private readonly fxProvider: IFxProvider,
     private readonly redisService: RedisService,
     private readonly configService: ConfigService,

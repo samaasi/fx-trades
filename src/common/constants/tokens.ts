@@ -1,0 +1,3 @@
+export const FX_PROVIDER = 'FX_PROVIDER';
+export const MAIL_PROVIDER = 'MAIL_PROVIDER';
+export const HASH_PROVIDER = 'HASH_PROVIDER';

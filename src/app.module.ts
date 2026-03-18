@@ -6,6 +6,7 @@ import configuration from './config/configuration';
 import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { WalletModule } from './modules/wallet/wallet.module';
+import { TransactionModule } from './modules/transaction/transaction.module';
 import { NotificationModule } from './modules/notification/notification.module';
 import { FxModule } from './modules/fx/fx.module';
 import { RedisModule } from './infrastructure/cache/redis.module';
@@ -35,6 +36,7 @@ import { typeOrmConfig } from './infrastructure/database/typeorm.config';
     UserModule,
     AuthModule,
     WalletModule,
+    TransactionModule,
   ],
 })
 export class AppModule {}
