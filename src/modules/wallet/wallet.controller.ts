@@ -26,4 +26,10 @@ export class WalletController {
   async convert(@Request() req, @Body() convertDto: ConvertCurrencyDto) {
     return this.walletService.convert(req.user.userId, convertDto);
   }
+
+  @Post('trade')
+  @UseInterceptors(IdempotencyInterceptor)
+  async trade(@Request() req, @Body() tradeDto: ConvertCurrencyDto) {
+    return this.walletService.trade(req.user.userId, tradeDto);
+  }
 }

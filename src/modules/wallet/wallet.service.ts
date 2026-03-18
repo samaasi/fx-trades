@@ -128,4 +128,65 @@ export class WalletService {
       return wallet.balances;
     });
   }
+
+  async trade(userId: string, tradeDto: ConvertCurrencyDto): Promise<Record<string, number>> {
+    const { fromCurrency, toCurrency, amount } = tradeDto;
+    const tradingFeePercent = 0.01; // 1% fee
+
+    const rate = await this.fxService.getConversionRate(fromCurrency, toCurrency);
+    const totalBeforeFee = amount * rate;
+    const fee = totalBeforeFee * tradingFeePercent;
+    const finalAmount = totalBeforeFee - fee;
+
+    return await this.dataSource.transaction(async (manager) => {
+      const wallet = await manager.findOne(Wallet, {
+        where: { userId },
+        lock: { mode: 'pessimistic_write' },
+      });
+
+      if (!wallet || (wallet.balances[fromCurrency] || 0) < amount) {
+        throw new BadRequestException('Insufficient balance');
+      }
+
+      const fromBalanceBefore = wallet.balances[fromCurrency] || 0;
+      const toBalanceBefore = wallet.balances[toCurrency] || 0;
+
+      wallet.balances[fromCurrency] -= amount;
+      wallet.balances[toCurrency] = (wallet.balances[toCurrency] || 0) + finalAmount;
+
+      const fromBalanceAfter = wallet.balances[fromCurrency];
+      const toBalanceAfter = wallet.balances[toCurrency];
+
+      await manager.save(wallet);
+
+      // Record transaction and ledger
+      await this.transactionService.recordTransaction(manager, {
+        userId,
+        type: TransactionType.TRADE,
+        amount,
+        currency: fromCurrency,
+        metadata: { rate, toCurrency, finalAmount, fee, tradingFeePercent },
+        ledgerEntries: [
+          {
+            currency: fromCurrency,
+            entryType: EntryType.DEBIT,
+            amount,
+            balanceBefore: fromBalanceBefore,
+            balanceAfter: fromBalanceAfter,
+            description: `Trade: ${amount} ${fromCurrency} to ${toCurrency}`,
+          },
+          {
+            currency: toCurrency,
+            entryType: EntryType.CREDIT,
+            amount: finalAmount,
+            balanceBefore: toBalanceBefore,
+            balanceAfter: toBalanceAfter,
+            description: `Trade: received ${finalAmount} ${toCurrency} from ${fromCurrency} (Fee: ${fee} ${toCurrency})`,
+          },
+        ],
+      });
+
+      return wallet.balances;
+    });
+  }
 }
