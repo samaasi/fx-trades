@@ -5,6 +5,7 @@ import { BullModule } from '@nestjs/bull';
 import configuration from './config/configuration';
 import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { WalletModule } from './modules/wallet/wallet.module';
 import { NotificationModule } from './modules/notification/notification.module';
 import { FxModule } from './modules/fx/fx.module';
 import { RedisModule } from './infrastructure/cache/redis.module';
@@ -33,6 +34,7 @@ import { typeOrmConfig } from './infrastructure/database/typeorm.config';
     FxModule,
     UserModule,
     AuthModule,
+    WalletModule,
   ],
 })
 export class AppModule {}
