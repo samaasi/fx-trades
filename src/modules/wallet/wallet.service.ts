@@ -5,6 +5,9 @@ import { Wallet } from './entities/wallet.entity';
 import { FundWalletDto } from './dto/fund-wallet.dto';
 import { ConvertCurrencyDto } from './dto/convert-currency.dto';
 import { FxService } from '../fx/fx.service';
+import { TransactionService } from '../transaction/transaction.service';
+import { TransactionType } from '../transaction/entities/transaction.entity';
+import { EntryType } from '../transaction/entities/ledger.entity';
 
 @Injectable()
 export class WalletService {
@@ -12,6 +15,7 @@ export class WalletService {
     @InjectRepository(Wallet)
     private readonly walletRepository: Repository<Wallet>,
     private readonly fxService: FxService,
+    private readonly transactionService: TransactionService,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -39,10 +43,30 @@ export class WalletService {
         wallet = manager.create(Wallet, { userId, balances: {} });
       }
 
-      const currentBalance = wallet.balances[currency] || 0;
-      wallet.balances[currency] = currentBalance + amount;
+      const balanceBefore = wallet.balances[currency] || 0;
+      wallet.balances[currency] = balanceBefore + amount;
+      const balanceAfter = wallet.balances[currency];
 
       await manager.save(wallet);
+
+      // Record transaction and ledger
+      await this.transactionService.recordTransaction(manager, {
+        userId,
+        type: TransactionType.FUND,
+        amount,
+        currency,
+        ledgerEntries: [
+          {
+            currency,
+            entryType: EntryType.CREDIT,
+            amount,
+            balanceBefore,
+            balanceAfter,
+            description: `Wallet funded with ${amount} ${currency}`,
+          },
+        ],
+      });
+
       return wallet.balances;
     });
   }
@@ -63,10 +87,44 @@ export class WalletService {
         throw new BadRequestException('Insufficient balance');
       }
 
+      const fromBalanceBefore = wallet.balances[fromCurrency] || 0;
+      const toBalanceBefore = wallet.balances[toCurrency] || 0;
+
       wallet.balances[fromCurrency] -= amount;
       wallet.balances[toCurrency] = (wallet.balances[toCurrency] || 0) + convertedAmount;
 
+      const fromBalanceAfter = wallet.balances[fromCurrency];
+      const toBalanceAfter = wallet.balances[toCurrency];
+
       await manager.save(wallet);
+
+      // Record transaction and ledger
+      await this.transactionService.recordTransaction(manager, {
+        userId,
+        type: TransactionType.CONVERT,
+        amount,
+        currency: fromCurrency,
+        metadata: { rate, toCurrency, convertedAmount },
+        ledgerEntries: [
+          {
+            currency: fromCurrency,
+            entryType: EntryType.DEBIT,
+            amount,
+            balanceBefore: fromBalanceBefore,
+            balanceAfter: fromBalanceAfter,
+            description: `Currency conversion: ${amount} ${fromCurrency} to ${toCurrency}`,
+          },
+          {
+            currency: toCurrency,
+            entryType: EntryType.CREDIT,
+            amount: convertedAmount,
+            balanceBefore: toBalanceBefore,
+            balanceAfter: toBalanceAfter,
+            description: `Currency conversion: received ${convertedAmount} ${toCurrency} from ${fromCurrency}`,
+          },
+        ],
+      });
+
       return wallet.balances;
     });
   }
