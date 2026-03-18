@@ -4,6 +4,7 @@ import { BullModule } from '@nestjs/bull';
 import { NotificationService } from './notification.service';
 import { SmtpProvider } from './providers/smtp.provider';
 import { NotificationProcessor } from './notification.processor';
+import { MAIL_PROVIDER } from '../../common/constants/tokens';
 
 @Global()
 @Module({
@@ -15,7 +16,7 @@ import { NotificationProcessor } from './notification.processor';
   ],
   providers: [
     {
-      provide: 'IMailProvider',
+      provide: MAIL_PROVIDER,
       useClass: SmtpProvider,
     },
     NotificationService,

@@ -1,9 +1,10 @@
-import * as ejs from 'ejs';
-import type { Queue } from 'bull';
-import { InjectQueue } from '@nestjs/bull';
 import { Injectable, Inject } from '@nestjs/common';
+import { InjectQueue } from '@nestjs/bull';
+import type { Queue } from 'bull';
+import * as ejs from 'ejs';
 import type { IMailProvider } from './providers/mail.provider.interface';
 import { createTemplateReader } from '../../common/utils/template.util';
+import { MAIL_PROVIDER } from '../../common/constants/tokens';
 
 @Injectable()
 export class NotificationService {
@@ -13,7 +14,7 @@ export class NotificationService {
   );
 
   constructor(
-    @Inject('IMailProvider')
+    @Inject(MAIL_PROVIDER)
     private readonly mailProvider: IMailProvider,
     @InjectQueue('notification')
     private readonly notificationQueue: Queue,

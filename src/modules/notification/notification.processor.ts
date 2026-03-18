@@ -2,13 +2,14 @@ import { Process, Processor } from '@nestjs/bull';
 import { Inject, Logger } from '@nestjs/common';
 import type { Job } from 'bull';
 import type { IMailProvider } from './providers/mail.provider.interface';
+import { MAIL_PROVIDER } from '../../common/constants/tokens';
 
 @Processor('notification')
 export class NotificationProcessor {
   private readonly logger = new Logger(NotificationProcessor.name);
 
   constructor(
-    @Inject('IMailProvider')
+    @Inject(MAIL_PROVIDER)
     private readonly mailProvider: IMailProvider,
   ) {}
 
