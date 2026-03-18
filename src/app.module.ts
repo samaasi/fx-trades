@@ -5,9 +5,10 @@ import { BullModule } from '@nestjs/bull';
 import configuration from './config/configuration';
 import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { NotificationModule } from './modules/notification/notification.module';
+import { FxModule } from './modules/fx/fx.module';
 import { RedisModule } from './infrastructure/cache/redis.module';
 import { typeOrmConfig } from './infrastructure/database/typeorm.config';
-import { NotificationModule } from './modules/notification/notification.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { NotificationModule } from './modules/notification/notification.module';
     }),
     RedisModule,
     NotificationModule,
+    FxModule,
     UserModule,
     AuthModule,
   ],

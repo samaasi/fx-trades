@@ -23,4 +23,10 @@ export default () => ({
     pass: process.env.SMTP_PASS,
     from: process.env.SMTP_FROM || '"FX Trade" <noreply@fxtrade.com>',
   },
+  fx: {
+    exchangeRate: {
+      apiKey: process.env.FX_API_KEY,
+      baseUrl: process.env.FX_BASE_URL || 'https://v6.exchangerate-api.com/v6/',
+    },
+  },
 });
