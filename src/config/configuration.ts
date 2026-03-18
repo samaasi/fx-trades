@@ -12,4 +12,8 @@ export default () => ({
     port: parseInt(process.env.REDIS_PORT ?? '6379', 10),
     password: process.env.REDIS_PASSWORD || '',
   },
+  jwt: {
+    secret: process.env.JWT_SECRET || 'secretKey',
+    expiresIn: process.env.JWT_EXPIRES_IN || '1d',
+  },
 });
