@@ -7,9 +7,10 @@ A robust NestJS-powered backend designed for currency trading and multi-currency
 - **User Authentication**: Secure registration and login using Argon2 hashing and JWT.
 - **OTP Verification**: Email verification via 6-digit OTP codes with background processing.
 - **Multi-Currency Wallets**: Support for NGN, USD, EUR, and more with real-time balance tracking.
+- **Double-Entry Ledger System**: Professional bookkeeping for all transactions, ensuring a full audit trail and data integrity.
 - **Asynchronous Notifications**: Email templates (EJS) sent via Bull queues and Redis workers.
 - **Real-time FX Rates**: Integration with external FX rate APIs, including Redis-based caching for high performance.
-- **Idempotency & Reliability**: Duplicate handling for financial operations using `X-Idempotency-Key` and database transactions.
+- **Idempotency & Reliability**: Duplicate handling for financial operations using `X-Idempotency-Key` and database transactions with row-level locking.
 
 ## Tech Stack
 
@@ -69,6 +70,7 @@ npm run start:prod
 ```text
 src/
 ├── common/           
+│   ├── constants/    # Shared constants (Injection tokens)
 │   ├── hash/         # Hashing service (Argon2)
 │   ├── interceptors/ # Idempotency interceptor
 │   ├── otp/          # OTP generation & validation
@@ -81,6 +83,7 @@ src/
     ├── auth/         # Authentication logic, guards, & strategies
     ├── fx/           # Foreign exchange providers & service
     ├── notification/ # Background email processing & templates
+    ├── transaction/  # Double-entry bookkeeping (Transactions & Ledgers)
     ├── user/         # User entity & module
     └── wallet/       # Wallet management & currency conversion
 ```
