@@ -7,6 +7,8 @@ import { OtpModule } from '../../common/otp/otp.module';
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { HashModule } from '../../common/hash/hash.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { LocalStrategy } from './strategies/local.strategy';
+import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
   imports: [
@@ -25,7 +27,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       inject: [ConfigService],
     }),
   ],
-  providers: [AuthService],
+  providers: [AuthService, LocalStrategy, JwtStrategy],
   controllers: [AuthController],
   exports: [JwtModule, AuthService],
 })

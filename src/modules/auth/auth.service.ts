@@ -1,8 +1,9 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../user/user.entity';
 import { RegisterDto } from './dto/register.dto';
+import { LoginDto } from './dto/login.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { HashService } from '../../common/hash/hash.service';
@@ -19,6 +20,29 @@ export class AuthService {
     private readonly otpService: OtpService,
     private readonly notificationService: NotificationService,
   ) {}
+
+  async validateUser(email: string, pass: string): Promise<any> {
+    const user = await this.userRepository.findOne({
+      where: { email },
+      select: ['id', 'email', 'password', 'isVerified'],
+    });
+
+    if (user && (await this.hashService.verify(user.password, pass))) {
+      if (!user.isVerified) {
+        throw new UnauthorizedException('Please verify your email first');
+      }
+      const { password, ...result } = user;
+      return result;
+    }
+    return null;
+  }
+
+  async login(user: any) {
+    const payload = { email: user.email, sub: user.id };
+    return {
+      accessToken: this.jwtService.sign(payload),
+    };
+  }
 
   async register(registerDto: RegisterDto) {
     const { email, password } = registerDto;
