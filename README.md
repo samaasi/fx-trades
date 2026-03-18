@@ -41,6 +41,15 @@ A robust NestJS-powered backend designed for currency trading and multi-currency
    cp .env.example .env
    ```
 
+### Postman Collection
+
+A complete Postman collection for testing all endpoints is available in the root directory: `fx-trade-collection.json`.
+
+1. Import `fx-trade-collection.json` into Postman.
+2. The collection uses a `baseUrl` variable (default: `http://localhost:3000/api/v1`).
+3. After a successful `Login`, the `accessToken` variable is automatically updated in the collection environment for subsequent requests.
+4. Requests to `Wallet` endpoints include an automatic `X-Idempotency-Key` (UUID) in the headers.
+
 ### Running the App
 
 ```bash
