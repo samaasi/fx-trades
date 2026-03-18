@@ -28,6 +28,7 @@ export default () => ({
       apiKey: process.env.FX_API_KEY,
       baseUrl: process.env.FX_BASE_URL || 'https://v6.exchangerate-api.com/v6/',
       cacheTtl: parseInt(process.env.FX_CACHE_TTL ?? '3600', 10),
+      staleTtl: parseInt(process.env.FX_STALE_TTL ?? '86400', 10), // 24 hours default
     },
   },
 });
