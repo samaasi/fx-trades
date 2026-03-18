@@ -32,7 +32,6 @@ export class FxService {
     }
 
     if (cachedData) {
-      // Stale-While-Revalidate: Return stale data and refresh in background
       const staleRates = JSON.parse(cachedData);
       this.refreshRates(baseCurrency, cacheKey, freshKey).catch(() => {
         /* silent background failure */
@@ -40,7 +39,6 @@ export class FxService {
       return staleRates;
     }
 
-    // Cold miss: synchronous fetch with retries
     return this.refreshRates(baseCurrency, cacheKey, freshKey);
   }
 
@@ -103,5 +101,34 @@ export class FxService {
       }
     }
     throw lastError || new Error('Failed to refresh conversion rate');
+  }
+
+  async checkProviderHealth(): Promise<{
+    status: 'healthy' | 'degraded' | 'unhealthy';
+    details: string;
+    lastChecked: string;
+  }> {
+    try {
+      await this.fxProvider.getLatestRates('USD');
+      return {
+        status: 'healthy',
+        details: 'FX provider is responsive and returning data.',
+        lastChecked: new Date().toISOString(),
+      };
+    } catch (error) {
+      const cachedData = await this.redisService.get(`fx_rates_USD`);
+      if (cachedData) {
+        return {
+          status: 'degraded',
+          details: `FX provider error: ${error.message}. Serving stale data from cache.`,
+          lastChecked: new Date().toISOString(),
+        };
+      }
+      return {
+        status: 'unhealthy',
+        details: `FX provider error: ${error.message}. No stale data available.`,
+        lastChecked: new Date().toISOString(),
+      };
+    }
   }
 }

@@ -82,6 +82,7 @@ npm run test:cov
 
 ### FX Rates
 - `GET /api/v1/fx/rates?base=NGN` - Get latest exchange rates (Cached with SWR)
+- `GET /api/v1/fx/health` - Check health status of the FX provider integration
 
 ### Transactions
 - `GET /api/v1/transactions` - Get user transaction history

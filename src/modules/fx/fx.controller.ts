@@ -9,4 +9,9 @@ export class FxController {
   async getLatestRates(@Query('base') base: string = 'NGN') {
     return this.fxService.getLatestRates(base);
   }
+
+  @Get('health')
+  async getHealth() {
+    return this.fxService.checkProviderHealth();
+  }
 }
