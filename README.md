@@ -8,8 +8,9 @@ A robust NestJS-powered backend designed for currency trading and multi-currency
 - **OTP Verification**: Email verification via 6-digit OTP codes with background processing.
 - **Multi-Currency Wallets**: Support for NGN, USD, EUR, and more with real-time balance tracking.
 - **Double-Entry Ledger System**: Professional bookkeeping for all transactions, ensuring a full audit trail and data integrity.
+- **System Analytics**: Real-time insights into trading volumes, popular currency pairs, and user activity distribution.
 - **Asynchronous Notifications**: Email templates (EJS) sent via Bull queues and Redis workers.
-- **Real-time FX Rates**: Integration with external FX rate APIs, including Redis-based caching for high performance.
+- **Real-time FX Rates**: Integration with external FX rate APIs, including Redis-based caching with **Stale-While-Revalidate (SWR)** strategy for high availability.
 - **Idempotency & Reliability**: Duplicate handling for financial operations using `X-Idempotency-Key` and database transactions with row-level locking.
 
 ## Tech Stack
@@ -53,6 +54,19 @@ npm run start:dev
 npm run start:prod
 ```
 
+### Running Tests
+
+```bash
+# unit tests
+npm run test
+
+# e2e tests
+npm run test:e2e
+
+# test coverage
+npm run test:cov
+```
+
 ## API Endpoints
 
 ### Auth
@@ -67,11 +81,22 @@ npm run start:prod
 - `POST /api/v1/wallet/trade` - Trade currencies with a 1% platform fee
 
 ### FX Rates
-- `GET /api/v1/fx/rates?base=NGN` - Get latest exchange rates (cached)
+- `GET /api/v1/fx/rates?base=NGN` - Get latest exchange rates (Cached with SWR)
 
 ### Transactions
 - `GET /api/v1/transactions` - Get user transaction history
 - `GET /api/v1/transactions/ledger` - Get detailed ledger entries (Internal audit log)
+
+### Analytics (Requires JWT)
+- `GET /api/v1/analytics/volume?currency=NGN&days=7` - Get total volume for a currency
+- `GET /api/v1/analytics/popular-pairs` - Get the most traded currency pairs
+- `GET /api/v1/analytics/activity` - Get platform activity distribution
+
+## Performance & Resilience
+
+- **Stale-While-Revalidate (SWR)**: The FX service implements an SWR strategy where stale rates are served instantly while a background refresh is triggered, ensuring zero-latency for users and high availability during API outages.
+- **Retry Mechanism**: External FX API calls are wrapped in a robust retry logic with exponential backoff to handle transient network failures.
+- **Atomic Operations**: All financial transactions use PostgreSQL's pessimistic row-level locking to prevent race conditions in multi-currency balance updates.
 
 ## Project Structure
 
@@ -88,6 +113,7 @@ src/
 │   ├── cache/        # Redis service & module
 │   └── database/     # TypeORM & database config
 └── modules/          
+    ├── analytics/    # System analytics & data aggregation
     ├── auth/         # Authentication logic, guards, & strategies
     ├── fx/           # Foreign exchange providers & service
     ├── notification/ # Background email processing & templates
